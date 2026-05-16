@@ -19,9 +19,41 @@
         .eco-node:hover { transform: scale(1.05); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
         .fade-in { animation: fadeIn 0.5s ease-in; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* 版權保護防禦樣式 */
+        .protect-content {
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none; /* Firefox */
+            -ms-user-select: none; /* IE10+/Edge */
+            user-select: none; /* Standard */
+            -webkit-touch-callout: none; /* iOS Safari */
+        }
+        
+        /* 列印保護：隱藏內容並顯示版權宣告 */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            body::after {
+                content: "版權所有 © 2026 國立暨南國際大學 駱世民教授。未經授權禁止列印、重製或散佈。";
+                visibility: visible;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                position: fixed;
+                top: 0; left: 0; right: 0; bottom: 0;
+                font-size: 24px;
+                font-weight: bold;
+                color: #334155;
+                text-align: center;
+                padding: 20px;
+                background-color: white;
+                z-index: 9999;
+            }
+        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center p-4 md:p-8">
+<body class="min-h-screen flex flex-col items-center p-4 md:p-8 protect-content">
 
     <header class="w-full max-w-6xl mb-8 text-center fade-in">
         <div class="flex justify-center items-center gap-4 mb-4">
@@ -114,7 +146,7 @@
                                 <span class="text-lg">📝</span> 教授手寫板書原稿摘錄：人才斷層與轉型挑戰
                             </h4>
                             <div class="bg-slate-50 p-2 rounded-lg border border-slate-200 inline-block relative group">
-                                <img src="企業成長與競合動態_手寫板書1_駱教授 20260516.jpg" alt="手寫板書：人才斷層、徵才問題與資深經理人退休" class="w-full max-w-xl mx-auto rounded shadow-sm group-hover:opacity-90 transition-opacity cursor-pointer" onclick="openModal(this.src)" title="點擊放大查看">
+                                <img src="企業成長與競合動態_手寫板書1_駱教授 20260516.jpg" alt="手寫板書：人才斷層、徵才問題與資深經理人退休" class="w-full max-w-xl mx-auto rounded shadow-sm group-hover:opacity-90 transition-opacity cursor-pointer" onclick="openModal(this.src)" title="點擊放大查看" draggable="false">
                                 <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity">
                                     <span class="bg-black bg-opacity-60 text-white px-4 py-2 rounded-full font-bold">🔍 點擊放大</span>
                                 </div>
@@ -256,10 +288,52 @@
     <!-- 圖片放大模態框 (Lightbox) -->
     <div id="imageModal" class="fixed inset-0 z-[100] hidden bg-slate-900 bg-opacity-90 flex justify-center items-center p-4 transition-opacity" onclick="closeModal()">
         <button onclick="closeModal()" class="absolute top-4 right-4 text-white text-4xl hover:text-teal-300 focus:outline-none transition-colors">&times;</button>
-        <img id="modalImage" src="" alt="放大圖片" class="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl cursor-zoom-out" onclick="event.stopPropagation(); closeModal();">
+        <img id="modalImage" src="" alt="放大圖片" class="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl cursor-zoom-out" onclick="event.stopPropagation(); closeModal();" draggable="false">
+    </div>
+
+    <!-- 版權提示 Toast (友善提醒視窗) -->
+    <div id="copyright-toast" class="fixed bottom-4 right-4 bg-slate-800 text-white px-6 py-3 rounded-lg shadow-xl transform translate-y-24 opacity-0 transition-all duration-300 z-[200] flex items-center gap-2 pointer-events-none">
+        <span class="text-xl">⚠️</span> 版權所有，請勿複製或下載。
     </div>
 
     <script>
+        // 版權保護防禦機制邏輯
+        function showCopyrightToast() {
+            const toast = document.getElementById('copyright-toast');
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 2500);
+        }
+
+        // 鎖定右鍵選單
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            showCopyrightToast();
+        });
+
+        // 鎖定特定鍵盤快捷鍵 (複製、全選、列印、存檔、開發者工具)
+        document.addEventListener('keydown', function(e) {
+            const cmdOrCtrl = e.ctrlKey || e.metaKey;
+            const key = e.key.toLowerCase();
+
+            if (
+                e.key === 'F12' || 
+                (cmdOrCtrl && e.shiftKey && (key === 'i' || key === 'j' || key === 'c')) || 
+                (cmdOrCtrl && (key === 'u' || key === 'c' || key === 's' || key === 'p' || key === 'a'))
+            ) {
+                e.preventDefault();
+                showCopyrightToast();
+            }
+        });
+
+        // 防止拖曳任何圖片
+        document.addEventListener('dragstart', function(e) {
+            if (e.target.nodeName === 'IMG') {
+                e.preventDefault();
+            }
+        });
+
         // 確保語音載入
         window.speechSynthesis.onvoiceschanged = function() {};
 
