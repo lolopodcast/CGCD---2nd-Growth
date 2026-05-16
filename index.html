@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>企業成長與競合動態分析</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chosen Palette: Warm Neutrals (Backgrounds) & Deep Teal/Terracotta Accents (Interactions) -->
+    <!-- Application Structure Plan: The application uses a tabbed dashboard structure reflecting the four-step "Process Flow Mapping" from the source report: 1. Input/Governance -> 2. Lifecycle/Process -> 3. Market Ecosystem -> 4. Output/Financials. This linear flow aids usability by breaking down complex corporate dynamics into digestible, chronological stages of value creation, preventing cognitive overload while maintaining the system-level view. -->
+    <!-- Visualization & Content Choices: Lifecycle -> Line Chart (show time vs growth stages) -> Interactive hover for stage challenges -> Chart.js; Ecosystem -> HTML/CSS Grid Matrix -> Clickable nodes for relationship details -> HTML/JS; Financials -> Waterfall/Bar Chart -> Visualizing cost deduction -> Chart.js. Confirming NO SVG/Mermaid used to ensure strict compliance, relying on Canvas and styled DOM elements. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { background-color: #faf9f6; color: #334155; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .chart-container { position: relative; width: 100%; max-width: 800px; margin-left: auto; margin-right: auto; height: 40vh; max-height: 400px; display: flex; justify-content: center; align-items: center; }
+        @media (min-width: 768px) { .chart-container { height: 350px; } }
+        .glass-panel { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(226, 232, 240, 0.8); }
+        .eco-node { transition: all 0.3s ease; cursor: pointer; }
+        .eco-node:hover { transform: scale(1.05); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4 md:p-8">
+
+    <header class="w-full max-w-6xl mb-8 text-center fade-in">
+        <div class="flex justify-center items-center gap-4 mb-4">
+            <h1 class="text-3xl md:text-5xl font-bold text-slate-800 tracking-tight">企業成長與競合動態</h1>
+            <button onclick="speakIntro()" class="bg-teal-100 hover:bg-teal-200 text-teal-800 p-3 rounded-full transition-colors shadow-sm focus:outline-none" title="語音導覽">
+                🔊
+            </button>
+        </div>
+        <p class="text-lg md:text-xl text-slate-600 max-w-3xl mx-auto">
+            探索企業如何從內部治理出發，於動態的市場生態系中，將資源轉化為財務績效與最終價值。
+        </p>
+        <div class="mt-6 flex flex-wrap justify-center gap-4">
+            <div class="glass-panel px-6 py-3 rounded-full shadow-sm border-l-4 border-teal-600">
+                <span class="font-bold text-teal-800">競合 (Co-opetition)</span> = 競爭者 × 合作者
+            </div>
+            <div class="glass-panel px-6 py-3 rounded-full shadow-sm border-l-4 border-orange-600">
+                <span class="font-bold text-orange-800">動態 (Dynamics)</span> = 一系列的行動與回應
+            </div>
+        </div>
+    </header>
+
+    <nav class="w-full max-w-6xl mb-8 flex flex-wrap justify-center gap-2 bg-white p-2 rounded-xl shadow-sm border border-slate-200 sticky top-4 z-50 fade-in">
+        <button id="nav-step1" onclick="switchTab('step1')" class="nav-btn flex-1 min-w-[150px] py-3 px-4 rounded-lg text-sm font-semibold transition-colors bg-teal-700 text-white">1. 外部環境與公司治理</button>
+        <button id="nav-step2" onclick="switchTab('step2')" class="nav-btn flex-1 min-w-[150px] py-3 px-4 rounded-lg text-sm font-semibold transition-colors bg-white text-slate-600 hover:bg-slate-50">2. 生命週期與績效因素</button>
+        <button id="nav-step3" onclick="switchTab('step3')" class="nav-btn flex-1 min-w-[150px] py-3 px-4 rounded-lg text-sm font-semibold transition-colors bg-white text-slate-600 hover:bg-slate-50">3. 市場競合互動</button>
+        <button id="nav-step4" onclick="switchTab('step4')" class="nav-btn flex-1 min-w-[150px] py-3 px-4 rounded-lg text-sm font-semibold transition-colors bg-white text-slate-600 hover:bg-slate-50">4. 財務與價值創造</button>
+    </nav>
+
+    <main class="w-full max-w-6xl flex-grow flex flex-col items-center">
+        
+        <section id="step1" class="app-section w-full fade-in">
+            <div class="glass-panel rounded-2xl p-6 md:p-10 shadow-lg">
+                <h2 class="text-2xl font-bold text-slate-800 mb-4 border-b-2 border-teal-600 pb-2 inline-block">1. 外部環境與公司治理</h2>
+                <p class="mb-8 text-slate-600 leading-relaxed">
+                    本區塊展示企業的根基。企業在 PESTEL 外部環境中運作，透過由上而下的公司治理架構籌集資源，並強調「資源等於資產」的核心財務概念，作為後續價值創造的輸入端。
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-slate-50 rounded-xl p-6 border border-slate-200">
+                        <div class="mb-6 p-4 bg-blue-50 border-l-4 border-blue-500 rounded-lg shadow-sm">
+                            <h4 class="font-bold text-blue-800 mb-1">大環境分析</h4>
+                            <p class="text-lg font-bold text-blue-900">PESTEL變遷 = 機會與威脅</p>
+                        </div>
+                        <h3 class="text-xl font-semibold text-slate-700 mb-4 flex items-center">🏢 公司治理 (授權與監督)</h3>
+                        <div class="flex flex-col items-center gap-2">
+                            <div class="w-full max-w-xs bg-white py-3 px-4 text-center rounded-lg shadow border border-slate-300 font-bold text-slate-700">股東大會</div>
+                            <div class="text-slate-400 font-bold">⬇️</div>
+                            <div class="w-full max-w-xs bg-white py-3 px-4 text-center rounded-lg shadow border border-slate-300 font-bold text-slate-700">董事會 (BOD)</div>
+                            <div class="text-slate-400 font-bold">⬇️</div>
+                            <div class="w-full max-w-xs bg-teal-600 py-3 px-4 text-center rounded-lg shadow text-white font-bold">高階經營團隊 (TMT)</div>
+                        </div>
+                        <div class="mt-6 p-4 bg-orange-50 border-l-4 border-orange-500 rounded-r-lg">
+                            <h4 class="font-bold text-orange-800 mb-1">人力資源核心</h4>
+                            <p class="text-sm text-orange-900">Σ 人才 = f(腦袋, 手腳, 心)</p>
+                            <p class="text-xs text-orange-700 mt-1">需結合思考、執行與向心力。</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 rounded-xl p-6 border border-slate-200">
+                        <h3 class="text-xl font-semibold text-slate-700 mb-4 flex items-center">⚖️ 財務與實體資源 (B/S)</h3>
+                        <p class="text-sm text-slate-500 mb-4 text-center">企業總資源 = Σ 資源(資產)n</p>
+                        <div class="chart-container">
+                            <canvas id="bsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="step2" class="app-section w-full hidden fade-in">
+            <div class="glass-panel rounded-2xl p-6 md:p-10 shadow-lg">
+                <h2 class="text-2xl font-bold text-slate-800 mb-4 border-b-2 border-teal-600 pb-2 inline-block">2. 生命週期與績效因素</h2>
+                <p class="mb-8 text-slate-600 leading-relaxed">
+                    此區域探討時間軸上的企業發展。經營團隊帶領企業經歷不同生命週期，面臨人才斷層等挑戰，必須透過管理方程式將內部資源與能力轉化為實質績效，以尋求再成長。
+                </p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2 bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+                        <h3 class="text-xl font-semibold text-slate-700 mb-4">📈 生命週期與績效軌跡</h3>
+                        <div class="chart-container">
+                            <canvas id="lifecycleChart"></canvas>
+                        </div>
+                        <div id="lifecycle-detail" class="mt-4 p-4 bg-slate-100 rounded-lg text-sm text-slate-700 hidden">
+                            <!-- JS 動態更新內容 -->
+                        </div>
+                        
+                        <!-- 嵌入原稿影像以呼應組織與人才挑戰 -->
+                        <div class="mt-8 border-t border-slate-200 pt-6">
+                            <h4 class="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
+                                <span class="text-lg">📝</span> 教授手寫板書原稿摘錄：人才斷層與轉型挑戰
+                            </h4>
+                            <div class="bg-slate-50 p-2 rounded-lg border border-slate-200 inline-block relative group">
+                                <img src="企業成長與競合動態_手寫板書1_駱教授 20260516.jpg" alt="手寫板書：人才斷層、徵才問題與資深經理人退休" class="w-full max-w-xl mx-auto rounded shadow-sm group-hover:opacity-90 transition-opacity cursor-pointer" onclick="openModal(this.src)" title="點擊放大查看">
+                                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity">
+                                    <span class="bg-black bg-opacity-60 text-white px-4 py-2 rounded-full font-bold">🔍 點擊放大</span>
+                                </div>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-2">☝️ 點擊圖片可放大查看。圖中橘色標示明確指出成熟期將面臨「資深經理人退休」、「人才斷層」與「徵才問題」。</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-teal-900 text-white rounded-xl p-6 shadow-sm flex flex-col justify-center">
+                        <h3 class="text-xl font-semibold text-teal-100 mb-6 border-b border-teal-700 pb-2">⚙️ 績效因素方程式</h3>
+                        <div class="text-center mb-6">
+                            <span class="text-3xl font-bold text-teal-300">Performance</span>
+                            <span class="block text-lg mt-2">= f(資源, 能力, 文化)</span>
+                        </div>
+                        <ul class="space-y-4">
+                            <li class="flex items-start gap-3">
+                                <span class="bg-teal-700 px-2 py-1 rounded text-sm font-bold">資源</span>
+                                <span>= 資產 (實體與財務)</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="bg-teal-700 px-2 py-1 rounded text-sm font-bold">能力</span>
+                                <span>= 運用 (如何發揮)</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="bg-teal-700 px-2 py-1 rounded text-sm font-bold">文化</span>
+                                <span>= 管理 (如何領導與形塑)</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="step3" class="app-section w-full hidden fade-in">
+            <div class="glass-panel rounded-2xl p-6 md:p-10 shadow-lg">
+                <h2 class="text-2xl font-bold text-slate-800 mb-4 border-b-2 border-teal-600 pb-2 inline-block">3. 市場競合互動</h2>
+                <p class="mb-8 text-slate-600 leading-relaxed">
+                    本區塊視覺化企業所處的市場生態系。請點擊互動圖中的各個節點，了解企業如何提供產品服務滿足客戶，同時應對競爭者並與供應鏈及互補者建立動態關係。
+                </p>
+
+                <div class="flex flex-col md:flex-row gap-8 items-center justify-center">
+                    
+                    <div class="relative w-full max-w-md h-96 bg-slate-50 rounded-full border-4 border-slate-100 flex items-center justify-center">
+                        
+                        <div class="absolute top-4 left-1/2 transform -translate-x-1/2 eco-node bg-blue-100 border-2 border-blue-400 text-blue-800 px-4 py-2 rounded-full font-bold shadow-md" onclick="showEcoDetail('complementor')">
+                            🤝 互補者
+                        </div>
+                        
+                        <div class="absolute left-4 top-1/2 transform -translate-y-1/2 eco-node bg-purple-100 border-2 border-purple-400 text-purple-800 px-4 py-2 rounded-full font-bold shadow-md" onclick="showEcoDetail('supplier')">
+                            ⚙️ 供應鏈
+                        </div>
+                        
+                        <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 eco-node bg-red-100 border-2 border-red-400 text-red-800 px-4 py-2 rounded-full font-bold shadow-md" onclick="showEcoDetail('competitor')">
+                            ⚔️ 競爭者
+                        </div>
+                        
+                        <div class="absolute right-4 top-1/2 transform -translate-y-1/2 eco-node bg-green-100 border-2 border-green-400 text-green-800 px-4 py-2 rounded-full font-bold shadow-md" onclick="showEcoDetail('customer')">
+                            👥 客戶(需求)
+                        </div>
+                        
+                        <div class="w-32 h-32 bg-slate-800 text-white rounded-full flex flex-col items-center justify-center font-bold text-xl shadow-xl z-10 border-4 border-white cursor-pointer hover:bg-slate-700 transition-colors" onclick="showEcoDetail('enterprise')">
+                            <span>🏢</span>
+                            <span>企業</span>
+                        </div>
+                        
+                        <div class="absolute w-full h-full border border-slate-300 rounded-full border-dashed -z-10 animate-spin-slow" style="animation-duration: 20s;"></div>
+                    </div>
+
+                    <div class="w-full md:w-1/2 h-64 bg-white border border-slate-200 rounded-xl p-6 shadow-md flex flex-col justify-center transition-all" id="eco-detail-panel">
+                        <div class="text-center text-slate-400">
+                            <span class="text-4xl block mb-2">👆</span>
+                            點擊左側生態系節點<br>查看競合關係詳情
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <section id="step4" class="app-section w-full hidden fade-in">
+            <div class="glass-panel rounded-2xl p-6 md:p-10 shadow-lg">
+                <h2 class="text-2xl font-bold text-slate-800 mb-4 border-b-2 border-teal-600 pb-2 inline-block">4. 財務產出與價值創造</h2>
+                <p class="mb-8 text-slate-600 leading-relaxed">
+                    本區塊展示經營活動的最終結果。資源與市場互動轉化為損益表上的數字，由上至下扣除成本費用得出最終獲利，並以此為基礎創造股東與利害關係人的長遠價值。
+                </p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+                        <h3 class="text-xl font-semibold text-slate-700 mb-4">📊 財務展現 (損益表 I/S 流程)</h3>
+                        <div class="chart-container">
+                            <canvas id="financialChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-6 justify-center">
+                        <div class="bg-emerald-50 rounded-xl p-6 border border-emerald-200 shadow-sm relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-16 h-16 bg-emerald-200 rounded-bl-full opacity-50"></div>
+                            <h3 class="text-lg font-bold text-emerald-800 mb-2">營收 (Top Line)</h3>
+                            <p class="text-2xl font-black text-emerald-600 mb-1">Σ P<sub class="text-sm">i</sub> × Q<sub class="text-sm">i</sub></p>
+                            <p class="text-sm text-emerald-700">各項產品單價 × 銷售數量</p>
+                        </div>
+
+                        <div class="flex justify-center items-center">
+                            <span class="text-3xl text-slate-300">⬇️</span>
+                        </div>
+
+                        <div class="bg-slate-800 rounded-xl p-6 text-white shadow-sm relative overflow-hidden">
+                            <div class="absolute bottom-0 left-0 w-24 h-24 bg-slate-700 rounded-tr-full opacity-50"></div>
+                            <h3 class="text-lg font-bold text-slate-300 mb-4">最終價值創造 (Outcome)</h3>
+                            
+                            <div class="flex flex-col gap-3 relative z-10">
+                                <div class="bg-slate-700 p-3 rounded flex justify-between items-center">
+                                    <span>獲利能力決定</span>
+                                    <span class="font-bold text-teal-300">股利 (Dividend)</span>
+                                </div>
+                                <div class="bg-slate-700 p-3 rounded flex justify-between items-center">
+                                    <span>進而影響</span>
+                                    <span class="font-bold text-teal-300">股價 (Stock Price)</span>
+                                </div>
+                                <div class="mt-4 pt-4 border-t border-slate-600 flex justify-between items-center text-sm">
+                                    <span class="font-bold text-orange-400">股東價值</span>
+                                    <span class="text-slate-400 mx-2">平衡 vs.</span>
+                                    <span class="font-bold text-blue-300">利害關係人</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="w-full mt-12 py-6 text-center text-slate-500 text-sm flex flex-col gap-2">
+        <p>互動資訊分析平台架構 - 企業成長與競合動態研究</p>
+        <p>資料來源：<a href="https://www.ibs.ncnu.edu.tw/index.php/faculty/tenured-professor/299-smlo" target="_blank" class="text-teal-600 hover:text-teal-800 font-bold transition-colors underline">國立暨南國際大學 駱世民教授</a> | 日期：2026/05/16</p>
+    </footer>
+
+    <!-- 圖片放大模態框 (Lightbox) -->
+    <div id="imageModal" class="fixed inset-0 z-[100] hidden bg-slate-900 bg-opacity-90 flex justify-center items-center p-4 transition-opacity" onclick="closeModal()">
+        <button onclick="closeModal()" class="absolute top-4 right-4 text-white text-4xl hover:text-teal-300 focus:outline-none transition-colors">&times;</button>
+        <img id="modalImage" src="" alt="放大圖片" class="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl cursor-zoom-out" onclick="event.stopPropagation(); closeModal();">
+    </div>
+
+    <script>
+        // 確保語音載入
+        window.speechSynthesis.onvoiceschanged = function() {};
+
+        let isSpeaking = false;
+
+        // 全網頁完整語音導覽功能 (支援自動切換分頁)
+        function speakIntro() {
+            if (!('speechSynthesis' in window)) {
+                alert("您的瀏覽器不支援語音導覽功能。");
+                return;
+            }
+
+            // 若正在播放中，再次點擊則停止導覽
+            if (isSpeaking) {
+                window.speechSynthesis.cancel();
+                isSpeaking = false;
+                return;
+            }
+
+            const scripts = [
+                "歡迎來到企業成長與競合動態分析。以下將為您完整導覽四個核心階段。",
+                "第一階段，外部環境與公司治理。企業面臨 PESTEL 大環境變遷帶來的機會與威脅，透過股東大會、董事會到高階經營團隊的治理架構籌集資源。這裡強調資源等於實體與財務資產，而人力資源則需要結合思考、執行與向心力。",
+                "第二階段，生命週期與績效因素。企業發展軌跡會經歷創立、成長、成熟到衰退或轉型。在成熟期，成長曲線趨近水平，企業將面臨資深經理人退休、人才斷層與徵才困難等嚴峻挑戰。此時，必須藉由資源、能力與文化的管理方程式來尋求再成長。",
+                "第三階段，市場競合互動。企業位處生態系中心，透過提供產品與服務滿足客戶需求，同時與供應鏈合作、防範競爭者，並與互補者建立策略聯盟，形成持續行動與回應的競合動態。",
+                "第四階段，財務產出與價值創造。所有的策略與營運結果，最終展現於損益表的財務數字上。營收扣除成本費用後得到淨利，獲利能力將決定股利與股價，並致力於平衡股東價值與整體利害關係人的利益。",
+                "語音導覽結束，歡迎您自由點擊網頁各區塊，探索更多互動細節。"
+            ];
+
+            const voices = window.speechSynthesis.getVoices();
+            // 優先使用 Yating，其次使用系統預設的台灣中文
+            const preferredVoice = voices.find(v => v.name.toLowerCase().includes('yating')) || 
+                                   voices.find(v => v.lang === 'zh-TW' || v.lang === 'zh-Hant-TW') ||
+                                   voices.find(v => v.lang.includes('zh'));
+
+            isSpeaking = true;
+            let currentIndex = 0;
+
+            function speakNext() {
+                if (!isSpeaking || currentIndex >= scripts.length) {
+                    isSpeaking = false;
+                    return;
+                }
+
+                // 配合語音內容，自動切換畫面分頁 (第1段到第4段對應 step1~step4)
+                if (currentIndex >= 1 && currentIndex <= 4) {
+                    switchTab('step' + currentIndex);
+                }
+
+                const utterance = new SpeechSynthesisUtterance(scripts[currentIndex]);
+                utterance.lang = 'zh-TW';
+                utterance.rate = 1.0; 
+                
+                if (preferredVoice) {
+                    utterance.voice = preferredVoice;
+                }
+                
+                utterance.onend = () => {
+                    currentIndex++;
+                    speakNext();
+                };
+
+                utterance.onerror = () => {
+                    isSpeaking = false;
+                };
+                
+                window.speechSynthesis.speak(utterance);
+            }
+
+            // 取消之前的播放，確保重新開始
+            window.speechSynthesis.cancel();
+            speakNext();
+        }
+
+        const ecoData = {
+            enterprise: { title: "企業 (Enterprise)", color: "text-slate-800", bg: "bg-slate-100", border: "border-slate-800", desc: "處於生態系中心，透過策略與營運管理（資源、能力、文化），將資源轉化為財務績效。同時需要在動態的 PESTEL 環境中，運用 AI 輔助評估威脅與機會。" },
+            customer: { title: "客戶 (Customers)", color: "text-green-800", bg: "bg-green-50", border: "border-green-600", desc: "市場的需求者。企業提供各種產品與服務（Σ Products × Services）來滿足客戶，其購買行為直接構成企業的營收（P × Q）。" },
+            competitor: { title: "競爭者 (Competitors)", color: "text-red-800", bg: "bg-red-50", border: "border-red-600", desc: "在市場上與企業爭奪資源、供應鏈及客戶的對手。雙方透過一系列的行動與回應（Dynamics）形成競爭動態。" },
+            supplier: { title: "供應鏈 (Supply Chain)", color: "text-purple-800", bg: "bg-purple-50", border: "border-purple-600", desc: "提供企業生產所需之原物料與服務的上游夥伴，其穩定性與成本直接影響企業的成本結構（Cost）。" },
+            complementor: { title: "互補者 (Complementors)", color: "text-blue-800", bg: "bg-blue-50", border: "border-blue-600", desc: "與企業產品或服務具有互補效應的參與者。例如航空業的策略聯盟，透過合作（Cooperation）創造「1+1 > 2」的綜效。" }
+        };
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.app-section').forEach(el => {
+                el.classList.add('hidden');
+            });
+            document.getElementById(tabId).classList.remove('hidden');
+            
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-teal-700', 'text-white');
+                btn.classList.add('bg-white', 'text-slate-600');
+            });
+            
+            const activeBtn = document.getElementById('nav-' + tabId);
+            activeBtn.classList.remove('bg-white', 'text-slate-600');
+            activeBtn.classList.add('bg-teal-700', 'text-white');
+        }
+
+        function showEcoDetail(nodeId) {
+            const panel = document.getElementById('eco-detail-panel');
+            const data = ecoData[nodeId];
+            panel.innerHTML = `
+                <div class="fade-in border-l-4 ${data.border} pl-4">
+                    <h3 class="text-xl font-bold ${data.color} mb-3">${data.title}</h3>
+                    <p class="text-slate-700 leading-relaxed">${data.desc}</p>
+                </div>
+            `;
+            panel.className = `w-full md:w-1/2 h-64 ${data.bg} border ${data.border} rounded-xl p-6 shadow-md flex flex-col justify-center transition-all`;
+        }
+
+        let chartsInitialized = false;
+
+        // 圖片放大功能 (Lightbox)
+        function openModal(src) {
+            document.getElementById('modalImage').src = src;
+            document.getElementById('imageModal').classList.remove('hidden');
+        }
+
+        // 關閉圖片放大
+        function closeModal() {
+            document.getElementById('imageModal').classList.add('hidden');
+        }
+
+        function initCharts() {
+            if (chartsInitialized) return;
+
+            const bsCtx = document.getElementById('bsChart').getContext('2d');
+            new Chart(bsCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['流動資產', '固定/無形資產', '負債 (Liabilities)', '股東權益 (Equity)'],
+                    datasets: [{
+                        data: [30, 70, 40, 60],
+                        backgroundColor: ['#0f766e', '#14b8a6', '#f43f5e', '#f59e0b'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    if(context.dataIndex < 2) return context.label + ' (構成總資源)';
+                                    return context.label + ' (資源來源)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const lcCtx = document.getElementById('lifecycleChart').getContext('2d');
+            const lifecycleChart = new Chart(lcCtx, {
+                type: 'line',
+                data: {
+                    labels: ['創立', '發展初期', '成長期', '成熟初期', '成熟後期', '衰退/轉型期'],
+                    datasets: [
+                        {
+                            label: '既有事業軌跡 (衰退)',
+                            data: [5, 20, 65, 95, 95, 40],
+                            borderColor: '#ea580c',
+                            backgroundColor: 'rgba(234, 88, 12, 0.1)',
+                            borderWidth: 3,
+                            pointBackgroundColor: ['#94a3b8', '#94a3b8', '#ea580c', '#b91c1c', '#b91c1c', '#475569'],
+                            pointRadius: [4, 4, 6, 6, 8, 5],
+                            fill: false,
+                            tension: 0.4
+                        },
+                        {
+                            label: '轉型再成長',
+                            data: [null, null, null, null, 95, 130],
+                            borderColor: '#16a34a',
+                            borderWidth: 3,
+                            borderDash: [5, 5],
+                            pointBackgroundColor: '#16a34a',
+                            pointRadius: [0, 0, 0, 0, 8, 6],
+                            fill: false,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    onClick: (e, activeEls) => {
+                        if (activeEls.length > 0) {
+                            const index = activeEls[0].index;
+                            const detailBox = document.getElementById('lifecycle-detail');
+                            let text = "";
+                            if(index === 2) text = "<strong>成長期：</strong> 企業快速擴張，需建立專業管理制度與穩定資源投入。";
+                            else if(index === 3 || index === 4) text = "<strong>成熟期：</strong> 曲線趨近水平，面臨「資深經理人退休」、「人才斷層」與「徵才困難」，必須推動專業化。";
+                            else if(index === 5) text = "<strong>衰退與轉型：</strong> 既有事業向下衰退，同時企業必須尋找新機會(如AI輔助、策略聯盟)以開創向上的再成長曲線。";
+                            else text = "各階段皆需檢視資源與能力的配置。";
+                            
+                            detailBox.innerHTML = text;
+                            detailBox.classList.remove('hidden');
+                            detailBox.classList.add('fade-in');
+                        }
+                    },
+                    plugins: {
+                        legend: { display: true, position: 'top' },
+                        tooltip: {
+                            callbacks: {
+                                afterLabel: function(context) {
+                                    if(context.dataIndex === 3 || context.dataIndex === 4) return ['⚠️ 組織挑戰：', '- 資深經理人退休', '- 人才斷層'];
+                                    if(context.dataIndex === 5 && context.datasetIndex === 1) return '💡 轉型再成長機會';
+                                    if(context.dataIndex === 5 && context.datasetIndex === 0) return '📉 既有事業面臨衰退';
+                                    return '';
+                                }
+                            }
+                        }
+                    },
+                    scales: { y: { display: false, min: 0, max: 150 }, x: { grid: { display: false } } }
+                }
+            });
+
+            const finCtx = document.getElementById('financialChart').getContext('2d');
+            new Chart(finCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['營收(Top Line)', '成本(Cost)', '毛利', '費用(Exp)', '稅(Tax)', '淨利(Bottom Line)'],
+                    datasets: [{
+                        label: '財務流動',
+                        data: [100, -45, 55, -25, -5, 25],
+                        backgroundColor: function(context) {
+                            const val = context.dataset.data[context.dataIndex];
+                            if(context.dataIndex === 0 || context.dataIndex === 5) return '#0f766e'; 
+                            return val < 0 ? '#ef4444' : '#64748b'; 
+                        },
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: { label: function(context) { return '數值: ' + context.raw; } }
+                        }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            chartsInitialized = true;
+        }
+
+        window.onload = function() {
+            initCharts();
+        };
+
+    </script>
+</body>
+</html>
